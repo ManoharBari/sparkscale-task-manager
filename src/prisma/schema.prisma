@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  password        String
+  isAdmin         Boolean   @default(false)
+  tasks           Task[]    @relation("UserTasks") 
+  projectsOwned   Project[] @relation("ownsProject")
+  createdAt       DateTime  @default(now())
+  weekOff         String[]
+  deleted         Boolean   @default(false)
+  joiningDate     DateTime  @default(now())
+  resignationDate DateTime?
+}
+
+model Project {
+  id        String   @id @default(uuid())
+  name      String
+  ownerId   String
+  owner     User     @relation("ownsProject", fields: [ownerId], references: [id])
+  tasks     Task[]   @relation("ProjectTasks")
+  type      Type     @default(EXTERNAL)  
+  startDate DateTime
+  dueDate   DateTime
+  status    Status   @default(ONGOING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt()
+}
+
+model Task {
+  id             String   @id @default(uuid())
+  projectId      String
+  project        Project  @relation("ProjectTasks", fields: [projectId], references: [id])
+  assignedToId   String   
+  assignedTo     User     @relation("UserTasks", fields: [assignedToId], references: [id])
+  startDate      DateTime
+  dueDate        DateTime
+  completionDate DateTime?
+  status         Status
+  remarks        String?
+  name           String
+  description    String?
+  createdAt      DateTime @default(now())
+}
+
+enum Status {
+  NEW
+  ONGOING
+  ON_TRACK
+  DELAYED
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+enum Type {
+  INTERNAL
+  EXTERNAL
+}
