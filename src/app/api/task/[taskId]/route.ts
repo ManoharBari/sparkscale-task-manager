@@ -1,4 +1,4 @@
-import {prisma} from "@/src/lib/prisma";
+import { prisma } from "@/src/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -16,6 +16,12 @@ export async function GET(
       select: {
         dueDate: true,
         startDate: true,
+        project: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         projectId: true,
         id: true,
         remarks: true,

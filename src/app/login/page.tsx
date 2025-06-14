@@ -10,33 +10,32 @@ import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
 import { CheckSquare } from "lucide-react";
 
-const  LoginPage = () =>{
-  const { data: session, status, update } = useSession()
+const LoginPage = () => {
+  // const { data: session, status, update } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async () => {
-    setLoading(true);
     const res = await signIn("credentials", {
       redirect: false,
       email,
       password,
     });
 
-    setLoading(false);
-    // console.log("Login response:", res);
-    // console.log("User session:", user);
+    if (res?.ok) {
+      const sessionRes = await fetch("/api/auth/session");
+      const session = await sessionRes.json();
 
-    if (session?.user.isAdmin) {
+      if (session?.user?.isAdmin) {
+        router.push("/admin");
+      } else {
+        router.push("/user-dashboard");
+      }
+
       toast.success("Logged in successfully");
-      router.push("/admin");
     } else {
-      router.push("/user-dashboard");
-      toast.success("Logged in successfully");
-    }
-    if (res?.error) {
       toast.error("Invalid credentials");
     }
   };
@@ -88,6 +87,6 @@ const  LoginPage = () =>{
       </div>
     </div>
   );
-}
+};
 
 export default LoginPage;

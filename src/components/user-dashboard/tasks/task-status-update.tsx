@@ -1,65 +1,91 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/src/components/ui/card"
-import { Button } from "@/src/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select"
-import { Textarea } from "@/src/components/ui/textarea"
-import { Badge } from "@/src/components/ui/badge"
-import { toast } from "@/src/components/ui/use-toast"
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/src/components/ui/card";
+import { Button } from "@/src/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/src/components/ui/select";
+import { Textarea } from "@/src/components/ui/textarea";
+import { Badge } from "@/src/components/ui/badge";
+import { toast } from "react-hot-toast";
 
 interface TaskStatusUpdateProps {
   task: {
-    id: string
-    name: string
-    status: string
-  }
+    id: string;
+    name: string;
+    status: string;
+  };
 }
 
 export function TaskStatusUpdate({ task }: TaskStatusUpdateProps) {
-  const [status, setStatus] = useState(task.status)
-  const [statusNote, setStatusNote] = useState("")
+  const [status, setStatus] = useState(task.status);
+  const [statusNote, setStatusNote] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const updateTaskStatus = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/task/updateRemark/${task.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status, statusNote }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update task status");
+
+      const data = await response.json();
+      toast.success("Task status updated successfully");
+      setStatusNote(""); 
+    } catch (error) {
+      console.error("Error updating task status:", error);
+      toast.error("Failed to update task status");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "NEW":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800";
       case "ONGOING":
-        return "bg-purple-100 text-purple-800"
+        return "bg-purple-100 text-purple-800";
       case "ON_TRACK":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "DELAYED":
-        return "bg-amber-100 text-amber-800"
+        return "bg-amber-100 text-amber-800";
       case "ON_HOLD":
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
       case "COMPLETED":
-        return "bg-emerald-100 text-emerald-800"
+        return "bg-emerald-100 text-emerald-800";
       case "CANCELLED":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
-
-  const handleUpdateStatus = () => {
-    // In a real app, you would send this to your API
-    console.log("Updating status:", { taskId: task.id, status, statusNote })
-
-    // Show success toast
-    toast({
-      title: "Status updated",
-      description: `Task status has been updated to ${status}`,
-    })
-
-    // Clear the note
-    setStatusNote("")
-  }
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Update Status</CardTitle>
-        <CardDescription>Change the current status of this task</CardDescription>
+        <CardDescription>
+          Change the current status of this task
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -95,10 +121,14 @@ export function TaskStatusUpdate({ task }: TaskStatusUpdateProps) {
         </div>
       </CardContent>
       <CardFooter>
-        <Button onClick={handleUpdateStatus} disabled={status === task.status} className="w-full">
-          Update Status
+        <Button
+          onClick={updateTaskStatus}
+          disabled={status === task.status || loading}
+          className="w-full"
+        >
+          {loading ? "Updating..." : "Update Status"}
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 }

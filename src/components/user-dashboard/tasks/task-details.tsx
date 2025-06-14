@@ -94,7 +94,7 @@ export function TaskDetails({ task }: TaskDetailsProps) {
               <FileText className="h-4 w-4 text-muted-foreground" />
               <div>
                 <div className="text-sm font-medium">Assigned To</div>
-                <div className="text-xs text-muted-foreground">{task.assignedTo.name}</div>
+                <div className="text-xs text-muted-foreground">{task.assignedTo.email}</div>
               </div>
             </div>
           </div>

@@ -40,7 +40,7 @@ export function UserDashboardNav() {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Ta</SidebarGroupLabel>
+      <SidebarGroupLabel>Task Manager</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {routes.map((route) => (

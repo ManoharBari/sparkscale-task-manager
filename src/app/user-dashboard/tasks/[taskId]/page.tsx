@@ -1,43 +1,48 @@
-import { UserDashboardHeader } from "@/src/components/user-dashboard/dashboard-header"
-import { DashboardShell } from "@/src/components/dashboard-shell"
-import { TaskDetails } from "@/src/components/user-dashboard/tasks/task-details"
-import { TaskRemarks } from "@/src/components/user-dashboard/tasks/task-remarks"
-import { TaskStatusUpdate } from "@/src/components/user-dashboard/tasks/task-status-update"
+"use client";
 
-interface TaskPageProps {
-  params: {
-    taskId: string
-  }
-}
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
-export default async function TaskPage({ params }: TaskPageProps) {
-  const { taskId } = params
+import { UserDashboardHeader } from "@/src/components/user-dashboard/dashboard-header";
+import { DashboardShell } from "@/src/components/dashboard-shell";
+import { TaskDetails } from "@/src/components/user-dashboard/tasks/task-details";
+import { TaskRemarks } from "@/src/components/user-dashboard/tasks/task-remarks";
+import { TaskStatusUpdate } from "@/src/components/user-dashboard/tasks/task-status-update";
 
-  // In a real app, you would fetch the task data
-  // const task = await getTask(taskId)
-  // if (!task) notFound()
+export default function TaskPage() {
+  const { taskId } = useParams() as { taskId: string };
+  const [task, setTask] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock task data
-  const task = {
-    id: taskId,
-    name: "Update user documentation",
-    description: "Review and update all user documentation for the new release",
-    project: {
-      id: "project-1",
-      name: "Website Redesign",
-    },
-    assignedTo: {
-      id: "user-1",
-      name: "John Doe",
-    },
-    startDate: "2023-04-15",
-    dueDate: "2023-05-10",
-    status: "ONGOING",
+  useEffect(() => {
+    if (!taskId) return;
+
+    const fetchTask = async () => {
+      try {
+        const res = await fetch(`/api/task/${taskId}`);
+        if (!res.ok) throw new Error("Failed to fetch task");
+        const data = await res.json();
+        setTask(data);
+      } catch (error) {
+        console.error("Error fetching task:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTask();
+  }, [taskId]);
+
+  if (loading || !task) {
+    return <div className="p-4">Loading task...</div>;
   }
 
   return (
     <DashboardShell>
-      <UserDashboardHeader heading={task.name} text={`Task in ${task.project.name}`} />
+      <UserDashboardHeader
+        heading={task.name}
+        text={`Task in ${task.project?.name || "Unknown Project"}`}
+      />
       <div className="grid gap-4 md:grid-cols-3">
         <div className="md:col-span-2">
           <TaskDetails task={task} />
@@ -50,5 +55,5 @@ export default async function TaskPage({ params }: TaskPageProps) {
         <TaskRemarks taskId={taskId} />
       </div>
     </DashboardShell>
-  )
+  );
 }

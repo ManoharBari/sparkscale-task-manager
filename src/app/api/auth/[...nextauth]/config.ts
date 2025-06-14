@@ -1,4 +1,4 @@
-import credentialProvider from "../config";
+import credentialsProvider from "../config";
 
 declare module "next-auth" {
   interface User {
@@ -19,30 +19,36 @@ declare module "next-auth" {
 }
 
 export const authConfig = {
-  providers: [credentialProvider],
+  providers: [credentialsProvider],
   callbacks: {
-    async signIn({ user, account, profile, email, credentials }: any) {
-      // Check if the user is an admin
-      console.log("User:", user);
-      if (user && user.isAdmin) {
-        return {
-          user: { id: user.id, email: user.email, isAdmin: user.isAdmin },
-        };
-      }
-  
+    // Called when user signs in
+    async signIn({ user }: any) {
+      if (!user) return false;
+      // Allow all users to sign in
+      return true;
     },
+
+    // Called after sign in, determines where to redirect
     async redirect({ url, baseUrl }: any) {
+      // Allow only local redirects (security)
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+
       return baseUrl;
     },
-    async session({ session, token, user }: any) {
-      if (token) {
+
+    // Called to attach user data to session
+    async session({ session, token }: any) {
+      if (token && session.user) {
         session.user.id = token.id;
         session.user.email = token.email;
         session.user.isAdmin = token.isAdmin;
       }
       return session;
     },
-    async jwt({ token, user, account, profile, isNewUser }: any) {
+
+    // Called when token is created or updated
+    async jwt({ token, user }: any) {
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -51,6 +57,8 @@ export const authConfig = {
       return token;
     },
   },
+
+  // Customize sign-in page
   pages: {
     signIn: "/",
   },
