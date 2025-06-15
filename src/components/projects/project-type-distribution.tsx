@@ -63,25 +63,24 @@ export function ProjectTypeDistribution() {
       <CardContent>
         <div className="flex flex-col items-center">
           <div className="relative w-40 h-40 mb-6">
-            {data.map((item, index, arr) => {
-              const percentage = (item.value / total) * 100;
-              let startAngle = 0;
-              for (let i = 0; i < index; i++) {
-                startAngle += (arr[i].value / total) * 360;
-              }
-              const endAngle = startAngle + (percentage / 100) * 360;
-
-              return (
-                <div
-                  key={item.name}
-                  className="absolute inset-0 rounded-full"
-                  style={{
-                    background: `conic-gradient(${item.color} ${startAngle}deg, ${item.color} ${endAngle}deg, transparent ${endAngle}deg)`,
-                    clipPath: "circle(50%)",
-                  }}
-                />
-              );
-            })}
+            <div className="relative w-40 h-40 mb-6">
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: `conic-gradient(
+        ${data
+          .map((item, index) => {
+            const from = data
+              .slice(0, index)
+              .reduce((sum, d) => sum + (d.value / total) * 360, 0);
+            const to = from + (item.value / total) * 360;
+            return `${item.color} ${from}deg ${to}deg`;
+          })
+          .join(", ")}
+      )`,
+                }}
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-2 w-full">
