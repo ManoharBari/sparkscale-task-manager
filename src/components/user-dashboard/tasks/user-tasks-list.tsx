@@ -89,7 +89,7 @@ export function UserTasksList() {
         return "bg-gray-100 text-gray-800";
     }
   };
-
+  console.log("Tasks:", tasks);
   const filteredTasks = tasks.filter(
     (task) =>
       (task.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -182,7 +182,7 @@ export function UserTasksList() {
                       href={`/user-dashboard/projects/${task.projectId}`}
                       className="text-sm hover:underline"
                     >
-                      {task.projectId.name}
+                      {task.project.name}
                     </Link>
                   </TableCell>
                   <TableCell>

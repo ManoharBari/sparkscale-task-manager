@@ -7,7 +7,6 @@ export async function GET(
 ) {
   try {
     const { taskId } = await params;
-    console.log(taskId);
 
     const task = await prisma.task.findUnique({
       where: {

@@ -46,8 +46,7 @@ export function TaskStatusUpdate({ task }: TaskStatusUpdateProps) {
       });
 
       if (!response.ok) throw new Error("Failed to update task status");
-
-      const data = await response.json();
+      
       toast.success("Task status updated successfully");
       setStatusNote(""); 
     } catch (error) {

@@ -1,36 +1,55 @@
-import { UserDashboardHeader } from "@/src/components/user-dashboard/dashboard-header"
-import { DashboardShell } from "@/src/components/dashboard-shell"
-import { ProjectDetails } from "@/src/components/user-dashboard/projects/project-details"
-import { ProjectTasks } from "@/src/components/user-dashboard/projects/project-tasks"
-import { ProjectMembers } from "@/src/components/user-dashboard/projects/project-members"
-import { ProjectProgress } from "@/src/components/user-dashboard/projects/project-progress"
+"use client";
 
-interface ProjectPageProps {
-  params: {
-    projectId: string
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import axios from "axios";
+
+import { UserDashboardHeader } from "@/src/components/user-dashboard/dashboard-header";
+import { DashboardShell } from "@/src/components/dashboard-shell";
+import { ProjectDetails } from "@/src/components/user-dashboard/projects/project-details";
+import { ProjectTasks } from "@/src/components/user-dashboard/projects/project-tasks";
+import { ProjectMembers } from "@/src/components/user-dashboard/projects/project-members";
+import { ProjectProgress } from "@/src/components/user-dashboard/projects/project-progress";
+
+export default function ProjectPage() {
+  const { projectId } = useParams() as { projectId: string };
+
+  const [project, setProject] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        const { data } = await axios.get(`/api/project/${projectId}`);
+        setProject(data);
+      } catch (err) {
+        console.error("Failed to fetch project:", err);
+        setError("Project not found");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (projectId) {
+      fetchProject();
+    }
+  }, []);
+
+  if (loading) {
+    return <div className="p-4 text-muted-foreground">Loading project...</div>;
   }
-}
 
-export default async function ProjectPage({ params }: ProjectPageProps) {
-  const { projectId } = params
-
-  // In a real app, you would fetch the project data
-  // const project = await getProject(projectId)
-  // if (!project) notFound()
-
-  // Mock project data
-  const project = {
-    id: projectId,
-    name: "Website Redesign",
-    description: "Redesign the company website with modern UI/UX principles",
-    startDate: "2023-03-01",
-    dueDate: "2023-06-30",
-    status: "ONGOING",
+  if (error || !project) {
+    return <div className="p-4 text-destructive">Project not found.</div>;
   }
-
+  console.log("Project data:", project);
   return (
     <DashboardShell>
-      <UserDashboardHeader heading={project.name} text={project.description} />
+      <UserDashboardHeader
+        heading={project.name}
+        text={project.description || ""}
+      />
       <div className="grid gap-4 md:grid-cols-3">
         <div className="md:col-span-2">
           <ProjectDetails project={project} />
@@ -44,9 +63,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           <ProjectTasks projectId={projectId} />
         </div>
         <div>
-          <ProjectMembers projectId={projectId} />
+          <ProjectMembers project={project} />
         </div>
       </div>
     </DashboardShell>
-  )
+  );
 }

@@ -1,207 +1,162 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/src/components/ui/table"
-import { Badge } from "@/src/components/ui/badge"
-import { Button } from "@/src/components/ui/button"
-import { Input } from "@/src/components/ui/input"
-import { Search } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar"
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/src/components/ui/table";
+import { Badge } from "@/src/components/ui/badge";
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import { Search } from "lucide-react";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/src/components/ui/avatar";
+import { AddProjectDialog } from "./add-project-modal";
+import axios from "axios";
 
 export function ProjectsList() {
-  const [searchTerm, setSearchTerm] = useState("")
+  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [projects, setProjects] = useState<any[]>([]);
 
-  // In a real app, this data would come from your database
-  const projects = [
-    {
-      id: "project-1",
-      name: "Website Redesign",
-      owner: {
-        name: "John Doe",
-        email: "john@example.com",
-        avatar: "/placeholder.svg?height=32&width=32",
-      },
-      type: "EXTERNAL",
-      startDate: "2023-03-01",
-      dueDate: "2023-06-30",
-      status: "ONGOING",
-      tasksCount: 15,
-      completedTasksCount: 8,
-    },
-    {
-      id: "project-2",
-      name: "Mobile App Development",
-      owner: {
-        name: "Sarah Smith",
-        email: "sarah@example.com",
-        avatar: "/placeholder.svg?height=32&width=32",
-      },
-      type: "EXTERNAL",
-      startDate: "2023-02-15",
-      dueDate: "2023-07-15",
-      status: "ON_TRACK",
-      tasksCount: 20,
-      completedTasksCount: 12,
-    },
-    {
-      id: "project-3",
-      name: "Database Migration",
-      owner: {
-        name: "Mike Johnson",
-        email: "mike@example.com",
-        avatar: "/placeholder.svg?height=32&width=32",
-      },
-      type: "INTERNAL",
-      startDate: "2023-04-01",
-      dueDate: "2023-05-15",
-      status: "DELAYED",
-      tasksCount: 10,
-      completedTasksCount: 3,
-    },
-    {
-      id: "project-4",
-      name: "CRM Implementation",
-      owner: {
-        name: "Emily Chen",
-        email: "emily@example.com",
-        avatar: "/placeholder.svg?height=32&width=32",
-      },
-      type: "EXTERNAL",
-      startDate: "2023-01-10",
-      dueDate: "2023-04-30",
-      status: "COMPLETED",
-      tasksCount: 18,
-      completedTasksCount: 18,
-    },
-    {
-      id: "project-5",
-      name: "Security Audit",
-      owner: {
-        name: "David Wilson",
-        email: "david@example.com",
-        avatar: "/placeholder.svg?height=32&width=32",
-      },
-      type: "INTERNAL",
-      startDate: "2023-04-15",
-      dueDate: "2023-05-30",
-      status: "ON_HOLD",
-      tasksCount: 12,
-      completedTasksCount: 5,
-    },
-  ]
+  // data would come from your database
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch("/api/project");
+        if (!response.ok) throw new Error("Failed to fetch projects");
+        const data = await response.json();
+        setProjects(data);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      }
+    };
+
+    fetchProjects();
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "NEW":
-        return "bg-blue-100 text-blue-800"
+        return "bg-blue-100 text-blue-800";
       case "ONGOING":
-        return "bg-purple-100 text-purple-800"
+        return "bg-purple-100 text-purple-800";
       case "ON_TRACK":
-        return "bg-green-100 text-green-800"
+        return "bg-green-100 text-green-800";
       case "DELAYED":
-        return "bg-amber-100 text-amber-800"
+        return "bg-amber-100 text-amber-800";
       case "ON_HOLD":
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
       case "COMPLETED":
-        return "bg-emerald-100 text-emerald-800"
+        return "bg-emerald-100 text-emerald-800";
       case "CANCELLED":
-        return "bg-red-100 text-red-800"
+        return "bg-red-100 text-red-800";
       default:
-        return "bg-gray-100 text-gray-800"
+        return "bg-gray-100 text-gray-800";
     }
-  }
+  };
 
   const filteredProjects = projects.filter(
     (project) =>
       project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.owner.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      project.ownerEmail.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Projects</CardTitle>
-            <CardDescription>Manage your projects</CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search projects..."
-                className="pl-8 w-[200px] md:w-[300px]"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+    <>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Projects</CardTitle>
+              <CardDescription>Manage your projects</CardDescription>
             </div>
-            <Button>Add Project</Button>
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search projects..."
+                  className="pl-8 w-[200px] md:w-[300px]"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <Button
+                onClick={() => {
+                  setOpen(true);
+                }}
+              >
+                Add Project
+              </Button>
+            </div>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Project</TableHead>
-              <TableHead>Owner</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Timeline</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Progress</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredProjects.map((project) => (
-              <TableRow key={project.id}>
-                <TableCell className="font-medium">{project.name}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={project.owner.avatar || "/placeholder.svg"} alt={project.owner.name} />
-                      <AvatarFallback>{project.owner.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <span>{project.owner.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge variant="outline">{project.type}</Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="text-xs">
-                    <div>{new Date(project.startDate).toLocaleDateString()}</div>
-                    <div>to {new Date(project.dueDate).toLocaleDateString()}</div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge className={getStatusColor(project.status)}>{project.status}</Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center">
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
-                      <div
-                        className="bg-blue-600 h-2.5 rounded-full"
-                        style={{ width: `${(project.completedTasksCount / project.tasksCount) * 100}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-xs">
-                      {Math.round((project.completedTasksCount / project.tasksCount) * 100)}%
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Button variant="ghost" size="sm">
-                    View
-                  </Button>
-                </TableCell>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Project</TableHead>
+                <TableHead>Owner</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Timeline</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
-  )
+            </TableHeader>
+            <TableBody>
+              {filteredProjects.map((project) => (
+                <TableRow key={project.id}>
+                  <TableCell className="font-medium">{project.name}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span>{project.ownerEmail}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{project.type}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-xs">
+                      <div>
+                        {new Date(project.startDate).toLocaleDateString()}
+                      </div>
+                      <div>
+                        to {new Date(project.dueDate).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={getStatusColor(project.status)}>
+                      {project.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="sm">
+                      View
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+      <AddProjectDialog open={open} onOpenChange={setOpen} />
+    </>
+  );
 }

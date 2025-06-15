@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import {prisma} from "@/src/lib/prisma";
+import { prisma } from "@/src/lib/prisma";
 
 export async function GET() {
   try {
@@ -13,11 +13,11 @@ export async function GET() {
         startDate: true,
         dueDate: true,
         status: true,
-        updatedAt:true,
+        updatedAt: true,
       },
     });
 
-    const projectIds = projects.map(project => project.id);
+    const projectIds = projects.map((project) => project.id);
 
     const tasks = await prisma.task.findMany({
       where: {
@@ -26,6 +26,7 @@ export async function GET() {
       select: {
         projectId: true,
         status: true,
+        // ownerId: true,
       },
     });
 
@@ -43,7 +44,7 @@ export async function GET() {
       }
     }
 
-    const ownerIds = [...new Set(projects.map(p => p.ownerId))];
+    const ownerIds = [...new Set(projects.map((p) => p.ownerId))];
 
     const users = await prisma.user.findMany({
       where: { id: { in: ownerIds } },
@@ -55,7 +56,7 @@ export async function GET() {
       userEmails[user.id] = user.email;
     }
 
-    const result = projects.map(project => {
+    const result = projects.map((project) => {
       const counts = taskCounts[project.id] || { total: 0, completed: 0 };
 
       return {
@@ -69,6 +70,9 @@ export async function GET() {
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error fetching projects:", error);
-    return NextResponse.json({ error: "Failed to fetch projects" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch projects" },
+      { status: 500 }
+    );
   }
 }

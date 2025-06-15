@@ -5,7 +5,6 @@ import bcrypt from "bcryptjs";
 export async function POST(req: Request) {
   try {
     const data = await req.json();
-    console.log("Received data:", data);
 
     const createdAt = data.createdAt ? new Date(data.createdAt) : new Date();
     const hashedPassword = await bcrypt.hash(data.password, 10);

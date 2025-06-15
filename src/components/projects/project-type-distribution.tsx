@@ -1,34 +1,75 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
+import axios from "axios";
+
+type Project = {
+  id: string;
+  name: string;
+  type: "INTERNAL" | "EXTERNAL";
+};
 
 export function ProjectTypeDistribution() {
-  // In a real app, this data would come from your database
-  const data = [
-    { name: "INTERNAL", value: 8, color: "#3b82f6" },
-    { name: "EXTERNAL", value: 12, color: "#22c55e" },
-  ]
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const total = data.reduce((acc, item) => acc + item.value, 0)
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const { data } = await axios.get("/api/projects");
+        setProjects(data);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch project types");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  const counts = {
+    INTERNAL: projects.filter((p) => p.type === "INTERNAL").length,
+    EXTERNAL: projects.filter((p) => p.type === "EXTERNAL").length,
+  };
+
+  const data = [
+    { name: "INTERNAL", value: counts.INTERNAL, color: "#3b82f6" },
+    { name: "EXTERNAL", value: counts.EXTERNAL, color: "#22c55e" },
+  ];
+
+  const total = data.reduce((acc, item) => acc + item.value, 0);
+
+  if (loading) return <p>Loading project distribution...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Project Types</CardTitle>
-        <CardDescription>Distribution of internal vs external projects</CardDescription>
+        <CardDescription>
+          Distribution of internal vs external projects
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col items-center">
-          {/* Simple pie chart using CSS */}
           <div className="relative w-40 h-40 mb-6">
             {data.map((item, index, arr) => {
-              // Calculate the percentage and angles for the pie segments
-              const percentage = (item.value / total) * 100
-              let startAngle = 0
+              const percentage = (item.value / total) * 100;
+              let startAngle = 0;
               for (let i = 0; i < index; i++) {
-                startAngle += (arr[i].value / total) * 360
+                startAngle += (arr[i].value / total) * 360;
               }
-              const endAngle = startAngle + (percentage / 100) * 360
+              const endAngle = startAngle + (percentage / 100) * 360;
 
               return (
                 <div
@@ -39,16 +80,21 @@ export function ProjectTypeDistribution() {
                     clipPath: "circle(50%)",
                   }}
                 />
-              )
+              );
             })}
           </div>
 
-          {/* Legend */}
           <div className="grid grid-cols-1 gap-2 w-full">
             {data.map((item) => (
-              <div key={item.name} className="flex items-center justify-between">
+              <div
+                key={item.name}
+                className="flex items-center justify-between"
+              >
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }}></div>
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  ></div>
                   <span className="text-sm">{item.name}</span>
                 </div>
                 <span className="text-sm font-medium">
@@ -60,5 +106,5 @@ export function ProjectTypeDistribution() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

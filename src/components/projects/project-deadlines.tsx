@@ -1,43 +1,64 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { Badge } from "@/src/components/ui/badge"
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
+import { Badge } from "@/src/components/ui/badge";
+import axios from "axios";
+
+interface Project {
+  id: string;
+  name: string;
+  dueDate: string;
+  status: string;
+  daysLeft: number;
+}
 
 export function ProjectDeadlines() {
-  // In a real app, this data would come from your database
-  const upcomingDeadlines = [
-    {
-      id: "project-1",
-      name: "Website Redesign",
-      dueDate: "2023-06-30",
-      status: "ONGOING",
-      daysLeft: 15,
-    },
-    {
-      id: "project-3",
-      name: "Database Migration",
-      dueDate: "2023-05-15",
-      status: "DELAYED",
-      daysLeft: -10, // Overdue
-    },
-    {
-      id: "project-5",
-      name: "Security Audit",
-      dueDate: "2023-05-30",
-      status: "ON_HOLD",
-      daysLeft: 5,
-    },
-    {
-      id: "project-2",
-      name: "Mobile App Development",
-      dueDate: "2023-07-15",
-      status: "ON_TRACK",
-      daysLeft: 30,
-    },
-  ]
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Sort by days left (ascending)
-  const sortedDeadlines = [...upcomingDeadlines].sort((a, b) => a.daysLeft - b.daysLeft)
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const { data } = await axios.get("/api/projects");
+
+        const now = new Date();
+
+        const enriched = data.map((project: any) => {
+          const dueDate = new Date(project.dueDate);
+          const daysLeft = Math.ceil(
+            (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+          );
+          return {
+            ...project,
+            daysLeft,
+          };
+        });
+
+        // Sort by daysLeft ascending
+        enriched.sort((a: Project, b: Project) => a.daysLeft - b.daysLeft);
+
+        setProjects(enriched);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch projects");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  if (loading) return <p>Loading deadlines...</p>;
+  if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <Card>
@@ -47,18 +68,27 @@ export function ProjectDeadlines() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {sortedDeadlines.map((project) => (
-            <div key={project.id} className="flex flex-col space-y-1 border-b pb-3 last:border-0">
+          {projects.map((project) => (
+            <div
+              key={project.id}
+              className="flex flex-col space-y-1 border-b pb-3 last:border-0"
+            >
               <div className="flex justify-between items-center">
                 <span className="font-medium">{project.name}</span>
                 {project.daysLeft < 0 ? (
                   <Badge variant="destructive">Overdue</Badge>
                 ) : project.daysLeft < 7 ? (
-                  <Badge variant="outline" className="bg-amber-100 text-amber-800">
+                  <Badge
+                    variant="outline"
+                    className="bg-amber-100 text-amber-800"
+                  >
                     Due Soon
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="bg-green-100 text-green-800">
+                  <Badge
+                    variant="outline"
+                    className="bg-green-100 text-green-800"
+                  >
                     Upcoming
                   </Badge>
                 )}
@@ -74,5 +104,5 @@ export function ProjectDeadlines() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
