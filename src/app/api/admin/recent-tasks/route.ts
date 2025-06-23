@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authConfig } from "@/src/app/api/auth/[...nextauth]/config";
 import { prisma } from "@/src/lib/prisma";
 
-// export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const session = await getServerSession(authConfig);

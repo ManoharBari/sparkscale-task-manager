@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma"; 
 
+
+export const dynamic = "force-dynamic";
+
 // GET - Fetch recently joined users (joined in last 30 days, or customize)
 export async function GET() {
   try {

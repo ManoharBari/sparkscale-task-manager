@@ -3,6 +3,9 @@ import { getServerSession } from "next-auth";
 import { authConfig } from "../../auth/[...nextauth]/config"; // Your next-auth config
 import { prisma } from "@/src/lib/prisma";
 
+
+export const dynamic = "force-dynamic";
+
 // GET: Fetch all projects for the logged-in user
 export async function GET() {
   const session = await getServerSession(authConfig);

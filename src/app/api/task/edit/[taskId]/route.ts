@@ -2,6 +2,9 @@ import { prisma } from "@/src/lib/prisma";
 import { NextResponse } from "next/server";
 import { Status } from "@prisma/client";
 
+
+export const dynamic = "force-dynamic";
+
 type Params = { taskId: string };
 type Body = {
   name: string;

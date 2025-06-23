@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authConfig } from "../../auth/[...nextauth]/config";
 
+
+export const dynamic = "force-dynamic";
+
 // Function to validate email format using regex
 function isValidEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

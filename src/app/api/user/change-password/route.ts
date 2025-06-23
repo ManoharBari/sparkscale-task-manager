@@ -4,6 +4,8 @@ import { authConfig } from "../../auth/[...nextauth]/config";
 import { prisma } from "@/src/lib/prisma";
 import bcrypt from "bcryptjs";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   const session = await getServerSession(authConfig);
 

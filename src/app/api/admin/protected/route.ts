@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authConfig } from "@/src/app/api/auth/[...nextauth]/config"; // adjust path as needed
 
-// export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   const session = await getServerSession(authConfig);
