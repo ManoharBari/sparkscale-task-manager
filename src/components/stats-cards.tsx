@@ -1,47 +1,80 @@
-"use client"
+"use client";
 
-import { cn } from "@/src/lib/utils"
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { Users, FolderKanban, CheckSquare, AlertTriangle } from "lucide-react"
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
+import { Users, FolderKanban, CheckSquare, AlertTriangle } from "lucide-react";
+import { cn } from "@/src/lib/utils";
+import axios from "axios";
 
 export function StatsCards() {
-  // In a real app, this data would come from your database
-  const stats = [
+  const [stats, setStats] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const { data } = await axios.get("/api/admin/stats-overview");
+        setStats(data);
+      } catch (err) {
+        console.error("Failed to fetch stats:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return <p className="text-sm text-muted-foreground">Loading stats...</p>;
+  }
+
+  if (!stats) {
+    return <p className="text-sm text-red-500">Failed to load stats.</p>;
+  }
+
+  const cardData = [
     {
       title: "Total Users",
-      value: "24",
+      value: stats.totalUsers,
       icon: Users,
-      description: "3 new this month",
+      description: `${stats.newUsersThisMonth} new this month`,
     },
     {
       title: "Active Projects",
-      value: "12",
+      value: stats.activeProjects,
       icon: FolderKanban,
-      description: "4 due this week",
+      description: `${stats.dueProjectsThisWeek} due this week`,
     },
     {
       title: "Total Tasks",
-      value: "78",
+      value: stats.totalTasks,
       icon: CheckSquare,
-      description: "23 completed this week",
+      description: `${stats.completedTasksThisWeek} completed this week`,
     },
     {
       title: "Delayed Tasks",
-      value: "5",
+      value: stats.delayedTasks,
       icon: AlertTriangle,
-      description: "Requires attention",
+      description: `Requires attention`,
       className: "text-amber-500",
     },
-  ]
+  ];
 
   return (
     <>
-      {stats.map((stat, index) => (
+      {cardData.map((stat, index) => (
         <Card key={index}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-            <stat.icon className={cn("h-4 w-4 text-muted-foreground", stat.className)} />
+            <stat.icon
+              className={cn("h-4 w-4 text-muted-foreground", stat.className)}
+            />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stat.value}</div>
@@ -50,5 +83,5 @@ export function StatsCards() {
         </Card>
       ))}
     </>
-  )
+  );
 }
