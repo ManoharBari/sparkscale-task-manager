@@ -1,50 +1,170 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { Button } from "@/src/components/ui/button"
-import { Input } from "@/src/components/ui/input"
-import { Label } from "@/src/components/ui/label"
-import { Switch } from "@/src/components/ui/switch"
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import { Label } from "@/src/components/ui/label";
+import { toast } from "react-hot-toast";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 export function SecuritySettings() {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("All password fields are required.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast.error("New password must be at least 8 characters.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("New password and confirmation must match.");
+      return;
+    }
+
+    const loadingToast = toast.loading("Changing password...");
+
+    try {
+      const res = await fetch("/api/user/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+
+      const result = await res.json();
+
+      toast.dismiss(loadingToast);
+
+      if (!res.ok) {
+        toast.error(result.error || "Something went wrong");
+        return;
+      }
+
+      toast.success("Password changed successfully");
+
+      // Clear inputs
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error("Unexpected error. Please try again later.");
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Security Settings</CardTitle>
-        <CardDescription>Manage your account security preferences</CardDescription>
+        <CardTitle>Change Password</CardTitle>
+        <CardDescription>Update your account password</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="current-password">Current Password</Label>
-          <Input id="current-password" type="password" />
+          <div className="relative">
+            <Input
+              id="current-password"
+              type={showCurrentPassword ? "text" : "password"}
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute right-0 top-0 h-full px-3 py-2"
+              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+            >
+              {showCurrentPassword ? (
+                <EyeOffIcon className="h-4 w-4" />
+              ) : (
+                <EyeIcon className="h-4 w-4" />
+              )}
+              <span className="sr-only">
+                {showCurrentPassword ? "Hide password" : "Show password"}
+              </span>
+            </Button>
+          </div>
         </div>
+
         <div className="space-y-2">
           <Label htmlFor="new-password">New Password</Label>
-          <Input id="new-password" type="password" />
+          <div className="relative">
+            <Input
+              id="new-password"
+              type={showNewPassword ? "text" : "password"}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute right-0 top-0 h-full px-3 py-2"
+              onClick={() => setShowNewPassword(!showNewPassword)}
+            >
+              {showNewPassword ? (
+                <EyeOffIcon className="h-4 w-4" />
+              ) : (
+                <EyeIcon className="h-4 w-4" />
+              )}
+              <span className="sr-only">
+                {showNewPassword ? "Hide password" : "Show password"}
+              </span>
+            </Button>
+          </div>
         </div>
+
         <div className="space-y-2">
           <Label htmlFor="confirm-password">Confirm New Password</Label>
-          <Input id="confirm-password" type="password" />
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label htmlFor="two-factor">Two-factor authentication</Label>
-            <div className="text-sm text-muted-foreground">Add an extra layer of security to your account</div>
+          <div className="relative">
+            <Input
+              id="confirm-password"
+              type={showConfirmPassword ? "text" : "password"}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute right-0 top-0 h-full px-3 py-2"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              {showConfirmPassword ? (
+                <EyeOffIcon className="h-4 w-4" />
+              ) : (
+                <EyeIcon className="h-4 w-4" />
+              )}
+              <span className="sr-only">
+                {showConfirmPassword ? "Hide password" : "Show password"}
+              </span>
+            </Button>
           </div>
-          <Switch id="two-factor" />
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label htmlFor="session-timeout">Session timeout</Label>
-            <div className="text-sm text-muted-foreground">Automatically log out after 30 minutes of inactivity</div>
-          </div>
-          <Switch id="session-timeout" defaultChecked />
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="outline">Reset Defaults</Button>
-        <Button>Update Password</Button>
+      <CardFooter>
+        <Button onClick={handleChangePassword} className="w-full">
+          Change Password
+        </Button>
       </CardFooter>
     </Card>
-  )
+  );
 }

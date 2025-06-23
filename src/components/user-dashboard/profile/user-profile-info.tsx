@@ -26,7 +26,6 @@ export function UserProfileInfo({ user }: UserProfileInfoProps) {
       <CardContent className="space-y-6">
         <div className="flex flex-col items-center space-y-3">
           <Avatar className="h-24 w-24">
-            <AvatarImage src="/placeholder.svg?height=96&width=96" alt="User Avatar" />
             <AvatarFallback className="text-2xl">{user.email.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="text-center">

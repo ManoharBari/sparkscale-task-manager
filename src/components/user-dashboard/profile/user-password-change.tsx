@@ -1,72 +1,73 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/src/components/ui/card"
-import { Button } from "@/src/components/ui/button"
-import { Input } from "@/src/components/ui/input"
-import { Label } from "@/src/components/ui/label"
-import { toast } from "@/src/components/ui/use-toast"
-import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
+import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
+import { Label } from "@/src/components/ui/label";
+import { toast } from "react-hot-toast";
+import { EyeIcon, EyeOffIcon } from "lucide-react";
 
 export function UserPasswordChange() {
-  const [currentPassword, setCurrentPassword] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
-  const [showNewPassword, setShowNewPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleChangePassword = () => {
-    // Validate inputs
-    if (!currentPassword) {
-      toast({
-        title: "Current password required",
-        description: "Please enter your current password",
-        variant: "destructive",
-      })
-      return
-    }
-
-    if (!newPassword) {
-      toast({
-        title: "New password required",
-        description: "Please enter a new password",
-        variant: "destructive",
-      })
-      return
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("All password fields are required.");
+      return;
     }
 
     if (newPassword.length < 8) {
-      toast({
-        title: "Password too short",
-        description: "New password must be at least 8 characters long",
-        variant: "destructive",
-      })
-      return
+      toast.error("New password must be at least 8 characters.");
+      return;
     }
 
     if (newPassword !== confirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "New password and confirmation must match",
-        variant: "destructive",
-      })
-      return
+      toast.error("New password and confirmation must match.");
+      return;
     }
 
-    // In a real app, you would send this to your API
-    console.log("Changing password")
+    const loadingToast = toast.loading("Changing password...");
 
-    toast({
-      title: "Password updated",
-      description: "Your password has been changed successfully",
-    })
+    try {
+      const res = await fetch("/api/user/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
 
-    // Reset form
-    setCurrentPassword("")
-    setNewPassword("")
-    setConfirmPassword("")
-  }
+      const result = await res.json();
+
+      toast.dismiss(loadingToast);
+
+      if (!res.ok) {
+        toast.error(result.error || "Something went wrong");
+        return;
+      }
+
+      toast.success("Password changed successfully");
+
+      // Clear inputs
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      toast.dismiss(loadingToast);
+      toast.error("Unexpected error. Please try again later.");
+    }
+  };
 
   return (
     <Card>
@@ -91,8 +92,14 @@ export function UserPasswordChange() {
               className="absolute right-0 top-0 h-full px-3 py-2"
               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
             >
-              {showCurrentPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
-              <span className="sr-only">{showCurrentPassword ? "Hide password" : "Show password"}</span>
+              {showCurrentPassword ? (
+                <EyeOffIcon className="h-4 w-4" />
+              ) : (
+                <EyeIcon className="h-4 w-4" />
+              )}
+              <span className="sr-only">
+                {showCurrentPassword ? "Hide password" : "Show password"}
+              </span>
             </Button>
           </div>
         </div>
@@ -113,8 +120,14 @@ export function UserPasswordChange() {
               className="absolute right-0 top-0 h-full px-3 py-2"
               onClick={() => setShowNewPassword(!showNewPassword)}
             >
-              {showNewPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
-              <span className="sr-only">{showNewPassword ? "Hide password" : "Show password"}</span>
+              {showNewPassword ? (
+                <EyeOffIcon className="h-4 w-4" />
+              ) : (
+                <EyeIcon className="h-4 w-4" />
+              )}
+              <span className="sr-only">
+                {showNewPassword ? "Hide password" : "Show password"}
+              </span>
             </Button>
           </div>
         </div>
@@ -135,8 +148,14 @@ export function UserPasswordChange() {
               className="absolute right-0 top-0 h-full px-3 py-2"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             >
-              {showConfirmPassword ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
-              <span className="sr-only">{showConfirmPassword ? "Hide password" : "Show password"}</span>
+              {showConfirmPassword ? (
+                <EyeOffIcon className="h-4 w-4" />
+              ) : (
+                <EyeIcon className="h-4 w-4" />
+              )}
+              <span className="sr-only">
+                {showConfirmPassword ? "Hide password" : "Show password"}
+              </span>
             </Button>
           </div>
         </div>
@@ -147,5 +166,5 @@ export function UserPasswordChange() {
         </Button>
       </CardFooter>
     </Card>
-  )
+  );
 }

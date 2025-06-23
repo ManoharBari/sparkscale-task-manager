@@ -1,36 +1,52 @@
-"use client"
+"use client";
 
-import React from "react"
+import React, { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/src/components/ui/card";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/src/components/ui/card"
+type HeatmapData = {
+  day: string;
+  hour: string;
+  value: number;
+};
 
 export function TaskDistributionHeatmap() {
-  // In a real app, this data would come from your database
-  const days = ["Mon", "Tue", "Wed", "Thu", "Fri"]
-  const hours = ["9AM", "11AM", "1PM", "3PM", "5PM"]
+  const [data, setData] = useState<HeatmapData[]>([]);
 
-  // Generate random data for the heatmap
-  const data = days.flatMap((day) => {
-    return hours.map((hour) => {
-      return {
-        day,
-        hour,
-        value: Math.floor(Math.random() * 10) + 1, // Random value between 1-10
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const hours = ["9AM", "11AM", "1PM", "3PM", "5PM"];
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/admin/task-heatmap");
+        const json = await res.json();
+        setData(json.data);
+      } catch (err) {
+        console.error("Failed to load heatmap data:", err);
       }
-    })
-  })
+    };
 
-  // Function to determine the background color based on the value
+    fetchData();
+  }, []);
+
   const getBackgroundColor = (value: number) => {
-    const intensity = Math.min(value / 10, 1) // Normalize to 0-1
-    return `rgba(59, 130, 246, ${intensity})`
-  }
+    const intensity = Math.min(value / 10, 1);
+    return `rgba(59, 130, 246, ${intensity})`;
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Task Activity Heatmap</CardTitle>
-        <CardDescription>Task activity distribution by day and time</CardDescription>
+        <CardDescription>
+          Task activity distribution by day and time
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-6 gap-1">
@@ -43,23 +59,29 @@ export function TaskDistributionHeatmap() {
           </div>
           {days.map((day, dayIndex) => (
             <React.Fragment key={dayIndex}>
-              <div className="flex items-center justify-end pr-2 text-xs font-medium">{day}</div>
+              <div className="flex items-center justify-end pr-2 text-xs font-medium">
+                {day}
+              </div>
               {hours.map((hour, hourIndex) => {
-                const cellData = data.find((d) => d.day === day && d.hour === hour)
+                const cellData = data.find(
+                  (d) => d.day === day && d.hour === hour
+                );
                 return (
                   <div
                     key={`${dayIndex}-${hourIndex}`}
                     className="aspect-square rounded-sm flex items-center justify-center text-xs font-medium text-white"
-                    style={{ backgroundColor: getBackgroundColor(cellData?.value || 0) }}
+                    style={{
+                      backgroundColor: getBackgroundColor(cellData?.value || 0),
+                    }}
                   >
-                    {cellData?.value}
+                    {cellData?.value ?? "-"}
                   </div>
-                )
+                );
               })}
             </React.Fragment>
           ))}
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

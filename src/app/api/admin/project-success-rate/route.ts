@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/src/lib/prisma";
 
-// export const dynamic = "force-dynamic";
+// IMPORTANT: Enables fresh data each time
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
@@ -18,15 +19,31 @@ export async function GET() {
     };
 
     projects.forEach((p) => {
-      if (statusCounts[p.status]) {
+      if (statusCounts[p.status] !== undefined) {
         statusCounts[p.status] += 1;
       }
     });
 
     const data = [
-      { name: "On Time", value: statusCounts["NEW"], color: "#22c55e" },
-      { name: "Delayed", value: statusCounts["DELAYED"], color: "#f59e0b" },
-      { name: "Failed", value: statusCounts["CANCELLED"], color: "#ef4444" },
+      {
+        name: "On Time",
+        value:
+          statusCounts["NEW"] +
+          statusCounts["ONGOING"] +
+          statusCounts["ON_TRACK"] +
+          statusCounts["COMPLETED"],
+        color: "#22c55e",
+      },
+      {
+        name: "Delayed",
+        value: statusCounts["DELAYED"] + statusCounts["ON_HOLD"],
+        color: "#f59e0b",
+      },
+      {
+        name: "Failed",
+        value: statusCounts["CANCELLED"],
+        color: "#ef4444",
+      },
     ];
 
     return NextResponse.json(data);

@@ -20,8 +20,6 @@ export default async function SettingsPage() {
         text="Manage your system preferences."
       />
       <div className="grid gap-4">
-        <GeneralSettings />
-        <NotificationSettings />
         <SecuritySettings />
       </div>
     </DashboardShell>
