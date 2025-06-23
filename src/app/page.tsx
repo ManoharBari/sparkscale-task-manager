@@ -82,7 +82,7 @@ export default function LandingPage() {
             <div className="flex items-center justify-center">
               <div className="relative w-full max-w-[500px] aspect-video overflow-hidden rounded-xl border bg-background shadow-xl">
                 <img
-                  src="/placeholder.svg?height=720&width=1280"
+                  src="https://i.ibb.co/CpnWQYSt/Screenshot-2025-06-23-215037.png"
                   alt="Dashboard Preview"
                   className="object-cover w-full h-full"
                 />
