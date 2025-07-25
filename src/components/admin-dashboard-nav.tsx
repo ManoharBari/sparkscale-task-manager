@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FolderKanban, CheckSquare, User, BarChart3, Settings } from "lucide-react";
+import {
+  LayoutDashboard,
+  FolderKanban,
+  CheckSquare,
+  User,
+  BarChart3,
+  Settings,
+} from "lucide-react";
 import {
   SidebarGroup,
   SidebarGroupContent,

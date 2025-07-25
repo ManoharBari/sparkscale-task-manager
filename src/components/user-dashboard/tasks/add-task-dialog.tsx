@@ -42,7 +42,7 @@ export function AddTaskDialog({
   const [taskDescription, setTaskDescription] = useState("");
   const [selectedProject, setSelectedProject] = useState(projectId || "");
   const [dueDate, setDueDate] = useState("");
-  const [status, setStatus] = useState("NEW");
+  const [status, setStatus] = useState("RECEIVED");
   const { data: session } = useSession();
   const userId = session?.user?.id;
 
@@ -66,7 +66,7 @@ export function AddTaskDialog({
       setTaskDescription("");
       setSelectedProject(projectId || "");
       setDueDate("");
-      setStatus("NEW");
+      setStatus("RECEIVED");
       onOpenChange(false);
     } catch (err: any) {
       toast.error(err.response?.data?.message || "Failed to create task");
@@ -132,13 +132,17 @@ export function AddTaskDialog({
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="NEW">New</SelectItem>
-                  <SelectItem value="ONGOING">Ongoing</SelectItem>
-                  <SelectItem value="ON_TRACK">On Track</SelectItem>
-                  <SelectItem value="DELAYED">Delayed</SelectItem>
-                  <SelectItem value="ON_HOLD">On Hold</SelectItem>
-                  <SelectItem value="COMPLETED">Completed</SelectItem>
-                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                  <SelectItem value="RECEIVED">Sample Received</SelectItem>
+                  <SelectItem value="PREP">Sample Prep</SelectItem>
+                  <SelectItem value="TESTING">Testing</SelectItem>
+                  <SelectItem value="CONDITIONING">
+                    Under Conditioning
+                  </SelectItem>
+                  <SelectItem value="DATA_LOGGING">Data Logging</SelectItem>
+                  <SelectItem value="REPORTING">Reporting</SelectItem>
+                  <SelectItem value="REVIEW">Under Review</SelectItem>
+                  <SelectItem value="APPROVED">Approved</SelectItem>
+                  <SelectItem value="REJECTED">Rejected</SelectItem>
                 </SelectContent>
               </Select>
             </div>

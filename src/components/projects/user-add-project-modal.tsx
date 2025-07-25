@@ -21,6 +21,7 @@ import {
 } from "@/src/components/ui/select";
 import { toast } from "react-hot-toast";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 interface AddProjectDialogProps {
   open: boolean;
@@ -32,13 +33,14 @@ export function AddProjectDialog({
   onOpenChange,
 }: AddProjectDialogProps) {
   const [name, setName] = useState("");
-  const [ownerEmail, setOwnerEmail] = useState(""); // selected email
   const [users, setUsers] = useState<{ id: string; email: string }[]>([]);
   const [type, setType] = useState("EXTERNAL");
   const [status, setStatus] = useState("RECEIVED");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
+  const useremail = session?.user?.email;
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -63,7 +65,7 @@ export function AddProjectDialog({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
-          ownerEmail, // send email to backend
+          ownerEmail: useremail,
           type,
           status,
           startDate,
@@ -78,7 +80,6 @@ export function AddProjectDialog({
 
       // Reset
       setName("");
-      setOwnerEmail("");
       setType("EXTERNAL");
       setStatus("RECEIVED");
       setStartDate("");
@@ -111,22 +112,6 @@ export function AddProjectDialog({
                 onChange={(e) => setName(e.target.value)}
                 required
               />
-            </div>
-
-            <div>
-              <Label htmlFor="owner">Project Owner</Label>
-              <Select value={ownerEmail} onValueChange={setOwnerEmail} required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select owner" />
-                </SelectTrigger>
-                <SelectContent>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.email}>
-                      {user.email}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             <div>

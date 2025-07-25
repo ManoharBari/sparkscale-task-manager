@@ -25,12 +25,21 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/src/components/ui/avatar";
-import { AddProjectDialog } from "./add-project-modal";
+import { AddProjectDialog } from "@/src/components/projects/add-project-modal";
 import axios from "axios";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 export function ProjectsList() {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [rolesFilter, setRolesFilter] = useState("ALL");
   const [projects, setProjects] = useState<any[]>([]);
 
   // data would come from your database
@@ -72,8 +81,10 @@ export function ProjectsList() {
 
   const filteredProjects = projects.filter(
     (project) =>
-      project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      project.ownerEmail.toLowerCase().includes(searchTerm.toLowerCase())
+      (project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.ownerEmail.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (statusFilter === "ALL" || project.status === statusFilter) &&
+      (rolesFilter === "ALL" || project.type === rolesFilter)
   );
 
   return (
@@ -96,6 +107,37 @@ export function ProjectsList() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
+
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All Statuses</SelectItem>
+                  <SelectItem value="RECEIVED">Sample Received</SelectItem>
+                  <SelectItem value="PREP">Sample Prep</SelectItem>
+                  <SelectItem value="TESTING">Testing</SelectItem>
+                  <SelectItem value="CONDITIONING">
+                    Under Conditioning
+                  </SelectItem>
+                  <SelectItem value="DATA_LOGGING">Data Logging</SelectItem>
+                  <SelectItem value="REPORTING">Reporting</SelectItem>
+                  <SelectItem value="REVIEW">Under Review</SelectItem>
+                  <SelectItem value="APPROVED">Approved</SelectItem>
+                  <SelectItem value="REJECTED">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={rolesFilter} onValueChange={setRolesFilter}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All Roles</SelectItem>
+                  <SelectItem value="EXTERNAL">EXTERNAL</SelectItem>
+                  <SelectItem value="INTERNAL">INTERNAL</SelectItem>
+                </SelectContent>
+              </Select>
+
               <Button
                 onClick={() => {
                   setOpen(true);
@@ -111,7 +153,7 @@ export function ProjectsList() {
             <TableHeader>
               <TableRow>
                 <TableHead>Project</TableHead>
-                <TableHead>Owner</TableHead>
+                <TableHead>Assigned To</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Timeline</TableHead>
                 <TableHead>Status</TableHead>

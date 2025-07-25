@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     const session = await getServerSession(authConfig);
 
     // Check if the session exists and the user is an admin
-    if (!session || !session.user || !session.user.isAdmin) {
+    if (!session || !session.user) {
       return NextResponse.json(
         { message: "You are not authorized to add this project" },
         { status: 403 }
